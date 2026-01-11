@@ -1,8 +1,8 @@
-# 📦 Guia de Instalação e Execução
+# Guia de Instalação e Execução
 
 Este guia explica passo a passo como instalar e executar a Plataforma de Achados e Perdidos localmente.
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 Antes de começar, você precisa ter instalado:
 
@@ -11,7 +11,7 @@ Antes de começar, você precisa ter instalado:
 - **npm** (já vem com Node.js) ou **yarn**
 - **Git** ([Download](https://git-scm.com/))
 
-## 🚀 Instalação
+## Instalação
 
 ### 1. Clone o repositório
 
@@ -74,7 +74,7 @@ cd ../frontend
 npm install
 ```
 
-## ▶️ Executar o Projeto
+## Executar o Projeto
 
 ### Opção 1: Executar Backend e Frontend Separadamente
 
@@ -86,9 +86,9 @@ npm run dev
 
 Você verá:
 ```
-🚀 Servidor rodando na porta 5000
-✅ MongoDB conectado: localhost
-📍 Ambiente: development
+Servidor rodando na porta 5000
+MongoDB conectado: localhost
+Ambiente: development
 ```
 
 **Terminal 2 - Frontend:**
@@ -101,8 +101,8 @@ Você verá:
 ```
   VITE v5.x.x  ready in xxx ms
 
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: use --host to expose
+  Local:   http://localhost:5173/
+  Network: use --host to expose
 ```
 
 ### Opção 2: Usar Script (Recomendado para Windows)
@@ -130,13 +130,13 @@ Execute:
 start.bat
 ```
 
-## 🌐 Acessar a Aplicação
+## Acessar a Aplicação
 
 Abra seu navegador e acesse:
 - **Frontend:** http://localhost:5173
 - **API:** http://localhost:5000
 
-## 🧪 Testar a API
+## Testar a API
 
 ### Com cURL:
 
@@ -170,7 +170,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 2. Configure a URL base: `http://localhost:5000/api`
 3. Teste os endpoints
 
-## 📱 Primeiro Acesso
+## Primeiro Acesso
 
 1. Acesse http://localhost:5173
 2. Clique em "CRIAR CONTA"
@@ -178,7 +178,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 4. Faça login
 5. Explore a plataforma!
 
-## 🐛 Problemas Comuns
+## Problemas Comuns
 
 ### MongoDB não está rodando
 
@@ -226,7 +226,7 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-## 🔄 Reiniciar do Zero
+## Reiniciar do Zero
 
 Se algo der muito errado:
 
@@ -248,7 +248,7 @@ cd ../frontend && npm install
 # Iniciar novamente
 ```
 
-## 📚 Estrutura de Pastas
+## Estrutura de Pastas
 
 ```
 ufc-achados-perdidos/
@@ -278,7 +278,7 @@ ufc-achados-perdidos/
 └── README.md             # Documentação principal
 ```
 
-## 🆘 Suporte
+## Suporte
 
 Se você encontrar problemas:
 
@@ -288,7 +288,7 @@ Se você encontrar problemas:
 4. Consulte os logs do terminal
 5. Leia a mensagem de erro completa
 
-## ✅ Checklist
+## Checklist
 
 - [ ] Node.js instalado
 - [ ] MongoDB instalado e rodando
@@ -303,4 +303,4 @@ Se você encontrar problemas:
 
 ---
 
-**Bom desenvolvimento! 🚀**
+**Bom desenvolvimento!**

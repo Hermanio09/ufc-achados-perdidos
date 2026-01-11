@@ -11,12 +11,32 @@ const Button = ({
 }) => {
   const baseClasses = 'font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
 
-  const variantClasses = {
-    primary: 'bg-ufc-blue text-white hover:bg-ufc-blue-light focus:ring-ufc-blue',
-    secondary: 'bg-white text-ufc-blue border-2 border-ufc-blue hover:bg-gray-50 focus:ring-ufc-blue',
-    success: 'bg-success text-white hover:bg-green-600 focus:ring-success',
-    danger: 'bg-danger text-white hover:bg-red-600 focus:ring-danger',
-    ghost: 'bg-transparent text-ufc-blue hover:bg-gray-100 focus:ring-ufc-blue'
+  const variantStyles = {
+    primary: {
+      backgroundColor: '#004C8C',
+      color: 'white',
+      border: 'none'
+    },
+    secondary: {
+      backgroundColor: 'white',
+      color: '#004C8C',
+      border: '2px solid #004C8C'
+    },
+    success: {
+      backgroundColor: '#28A745',
+      color: 'white',
+      border: 'none'
+    },
+    danger: {
+      backgroundColor: '#DC3545',
+      color: 'white',
+      border: 'none'
+    },
+    ghost: {
+      backgroundColor: 'transparent',
+      color: '#004C8C',
+      border: 'none'
+    }
   };
 
   const sizeClasses = {
@@ -33,7 +53,8 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses} ${widthClasses} ${className}`}
+      className={`${baseClasses} ${sizeClasses[size]} ${disabledClasses} ${widthClasses} ${className}`}
+      style={variantStyles[variant]}
       {...props}
     >
       {children}

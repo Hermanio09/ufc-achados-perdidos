@@ -12,6 +12,8 @@ export default {
         'success': '#28A745',
         'warning': '#FFC107',
         'danger': '#DC3545',
+        'gray-dark': '#333333',
+        'gray-medium': '#666666',
       },
       fontFamily: {
         'inter': ['Inter', 'sans-serif'],

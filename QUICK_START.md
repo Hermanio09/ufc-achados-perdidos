@@ -1,8 +1,8 @@
-# ⚡ Início Rápido
+# Início Rápido
 
 Guia rápido para executar o projeto em 5 minutos!
 
-## 📦 1. Instalar Dependências
+## 1. Instalar Dependências
 
 ```bash
 # Backend
@@ -14,7 +14,7 @@ cd ../frontend
 npm install
 ```
 
-## ⚙️ 2. Configurar Ambiente
+## 2. Configurar Ambiente
 
 ```bash
 # Backend - criar arquivo .env
@@ -24,7 +24,7 @@ cp .env.example .env
 
 Edite o arquivo `.env` se necessário (valores padrão funcionam).
 
-## 🗄️ 3. Iniciar MongoDB
+## 3. Iniciar MongoDB
 
 ### Windows:
 ```bash
@@ -38,7 +38,7 @@ sudo systemctl start mongodb
 brew services start mongodb-community
 ```
 
-## 🚀 4. Executar Aplicação
+## 4. Executar Aplicação
 
 Abra **2 terminais**:
 
@@ -50,8 +50,8 @@ npm run dev
 
 Aguarde aparecer:
 ```
-✅ MongoDB conectado
-🚀 Servidor rodando na porta 5000
+MongoDB conectado
+Servidor rodando na porta 5000
 ```
 
 **Terminal 2 - Frontend:**
@@ -62,14 +62,14 @@ npm run dev
 
 Aguarde aparecer o link:
 ```
-➜  Local:   http://localhost:5173/
+  Local:   http://localhost:5173/
 ```
 
-## 🌐 5. Acessar
+## 5. Acessar
 
 Abra seu navegador em: **http://localhost:5173**
 
-## 🎯 Testar
+## 6. Testar
 
 1. Clique em "CRIAR CONTA"
 2. Preencha:
@@ -83,7 +83,7 @@ Abra seu navegador em: **http://localhost:5173**
 3. Faça login
 4. Explore a plataforma!
 
-## ❌ Problemas?
+## Problemas?
 
 ### MongoDB não iniciou:
 ```bash
@@ -111,10 +111,10 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-## 📚 Precisa de mais ajuda?
+## Precisa de mais ajuda?
 
 Consulte: `INSTALACAO.md` (guia completo)
 
 ---
 
-**Pronto! Você está rodando a aplicação! 🎉**
+**Pronto! Você está rodando a aplicação!**

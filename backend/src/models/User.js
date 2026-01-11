@@ -28,12 +28,28 @@ const userSchema = new mongoose.Schema({
   },
   matricula: {
     type: String,
-    required: [true, 'Matrícula é obrigatória'],
-    unique: true
+    unique: true,
+    sparse: true, // Permite null/undefined duplicados (para staff)
+    required: function() {
+      return this.role === 'student';
+    }
   },
   curso: {
     type: String,
-    required: [true, 'Curso é obrigatório']
+    enum: {
+      values: [
+        'Engenharia de Software',
+        'Ciência da Computação',
+        'Engenharia de Produção',
+        'Engenharia Mecânica',
+        'Engenharia Civil',
+        null // Permite null para staff
+      ],
+      message: 'Curso inválido'
+    },
+    required: function() {
+      return this.role === 'student';
+    }
   },
   semestre: {
     type: String

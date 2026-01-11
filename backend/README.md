@@ -1,8 +1,8 @@
-# 🔧 Backend - API UFC Achados e Perdidos
+# Backend - API UFC Achados e Perdidos
 
 API REST para a Plataforma de Achados e Perdidos do Campus Russas da UFC.
 
-## 🛠 Tecnologias
+## Tecnologias
 
 - Node.js 18+
 - Express.js
@@ -11,7 +11,7 @@ API REST para a Plataforma de Achados e Perdidos do Campus Russas da UFC.
 - Multer para upload de imagens
 - Bcrypt para hash de senhas
 
-## 📁 Estrutura
+## Estrutura
 
 ```
 backend/
@@ -38,7 +38,7 @@ backend/
 └── package.json
 ```
 
-## 🚀 Instalação
+## Instalação
 
 ```bash
 # Instalar dependências
@@ -53,7 +53,7 @@ cp .env.example .env
 npm run dev
 ```
 
-## 🔌 Endpoints da API
+## Endpoints da API
 
 ### Autenticação
 
@@ -81,7 +81,7 @@ GET    /api/users/:id         # Perfil de usuário
 PUT    /api/users/me          # Atualizar perfil (autenticado)
 ```
 
-## 📝 Exemplos de Uso
+## Exemplos de Uso
 
 ### Registrar Usuário
 
@@ -155,7 +155,7 @@ GET /api/items/found?category=Eletrônicos&location=Biblioteca
 }
 ```
 
-## 🔐 Autenticação
+## Autenticação
 
 A API usa JWT (JSON Web Tokens) para autenticação.
 
@@ -165,7 +165,7 @@ Para rotas protegidas, inclua o token no header:
 Authorization: Bearer {seu_token_aqui}
 ```
 
-## 📦 Models
+## Models
 
 ### User
 
@@ -204,7 +204,7 @@ Authorization: Bearer {seu_token_aqui}
 }
 ```
 
-## ⚙️ Variáveis de Ambiente
+## Variáveis de Ambiente
 
 ```env
 NODE_ENV=development
@@ -214,7 +214,7 @@ JWT_SECRET=sua-chave-secreta-aqui
 FRONTEND_URL=http://localhost:5173
 ```
 
-## 🧪 Testando
+## Testando
 
 ```bash
 # Testar saúde da API
@@ -226,7 +226,7 @@ curl -X POST http://localhost:5000/api/auth/register \
   -d '{"name":"Teste","email":"teste@alu.ufc.br","password":"123456","matricula":"123456","curso":"ES"}'
 ```
 
-## 📊 Status Codes
+## Status Codes
 
 - `200` - OK
 - `201` - Created
@@ -236,6 +236,6 @@ curl -X POST http://localhost:5000/api/auth/register \
 - `404` - Not Found
 - `500` - Internal Server Error
 
-## 🤝 Contribuindo
+## Contribuindo
 
 Este é um projeto acadêmico desenvolvido para a disciplina de Desenvolvimento Web.

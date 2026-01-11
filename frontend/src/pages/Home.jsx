@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Bell, Menu, Home as HomeIcon, MessageCircle, User, Plus, MapPin } from 'lucide-react';
 import ItemCard from '../components/ItemCard';
+import Sidebar from '../components/Sidebar';
 import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
@@ -8,6 +9,7 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedLocation, setSelectedLocation] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Dados mockados dos itens (depois virão da API)
   const items = [
@@ -80,17 +82,23 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
       {/* Header */}
       <header className="bg-ufc-blue text-white p-4 shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <button className="p-2">
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 hover:bg-white/10 rounded transition-colors">
             <Menu size={24} />
           </button>
           <div className="text-center flex-1">
             <h1 className="font-bold text-lg">UFC ACHADOS E PERDIDOS</h1>
             <p className="text-xs opacity-90">Campus Russas</p>
           </div>
-          <button className="p-2 relative">
+          <button
+            onClick={() => navigate('/notificacoes')}
+            className="p-2 relative hover:bg-white/10 rounded transition-colors"
+          >
             <Bell size={24} />
             <span className="absolute top-1 right-1 w-2 h-2 bg-warning rounded-full"></span>
           </button>

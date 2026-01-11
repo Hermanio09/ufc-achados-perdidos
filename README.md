@@ -1,8 +1,8 @@
-# 🎓 UFC Achados e Perdidos - Campus Russas
+# UFC Achados e Perdidos - Campus Russas
 
 Plataforma web para conectar estudantes que perderam ou encontraram objetos no Campus Russas da UFC, aumentando a taxa de recuperação de itens de 30-40% para +70%.
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
 Este projeto foi desenvolvido como Trabalho Final da disciplina **Desenvolvimento de Software para Web** utilizando a metodologia **Design Thinking**.
 
@@ -20,7 +20,7 @@ Plataforma digital que:
 - Galeria visual de itens
 - Painel administrativo para a portaria
 
-## 👥 Personas
+## Personas
 
 **Lucas Oliveira** - Estudante que perde itens
 - Busca rapidez e clareza
@@ -32,7 +32,7 @@ Plataforma digital que:
 - Precisa de segurança na entrega
 - Valoriza reconhecimento
 
-## 🚀 Tecnologias
+## Tecnologias
 
 ### Frontend
 - React 18
@@ -51,7 +51,7 @@ Plataforma digital que:
 - Socket.io
 - Cloudinary (upload de imagens)
 
-## 📦 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 ufc-achados-perdidos/
@@ -61,7 +61,7 @@ ufc-achados-perdidos/
 └── README.md
 ```
 
-## ⚙️ Instalação
+## Instalação
 
 ### Pré-requisitos
 - Node.js 18+
@@ -84,7 +84,7 @@ cp .env.example .env
 npm run dev
 ```
 
-## 🎨 Design System
+## Design System
 
 ### Cores
 - Azul UFC: `#004C8C` (Primária)
@@ -98,7 +98,7 @@ npm run dev
 - Corpo: Inter Regular
 - Legendas: Inter Light
 
-## 📱 Funcionalidades
+## Funcionalidades
 
 ### Para Estudantes
 - [x] Cadastro com email institucional (@alu.ufc.br)
@@ -115,7 +115,7 @@ npm run dev
 - [x] Confirmação de entregas
 - [x] Estatísticas gerais
 
-## 📊 Requisitos Funcionais
+## Requisitos Funcionais
 
 - **RF01** - Autenticação e Cadastro
 - **RF02** - Registro de Itens Perdidos
@@ -127,7 +127,7 @@ npm run dev
 - **RF08** - Perfil e Histórico
 - **RF09** - Administração (Portaria)
 
-## 🎯 Regras de Negócio
+## Regras de Negócio
 
 - Apenas usuários com vínculo UFC podem acessar
 - Itens encontrados devem ter foto obrigatória
@@ -135,28 +135,28 @@ npm run dev
 - Chat liberado após manifestação de interesse
 - Máximo 10 itens perdidos ativos por usuário
 
-## 🌐 Deploy
+## Deploy
 
 - **Frontend**: Vercel
 - **Backend**: Render
 - **Banco de Dados**: Supabase PostgreSQL
 
-## 📚 Documentação
+## Documentação
 
 Todos os artefatos do Design Thinking estão disponíveis em `/docs`:
 - Documento de Imersão e Ideação
 - Protótipos de Alta Fidelidade
 - Lista Completa de Requisitos
 
-## 👨‍💻 Autor
+## Autor
 
 **Hermanio Santana Chaves**
 - Engenharia de Software - UFC Campus Russas
 
-## 📄 Licença
+## Licença
 
 Este projeto foi desenvolvido para fins acadêmicos.
 
 ---
 
-🤖 Desenvolvido com [Claude Code](https://claude.com/claude-code)
+Desenvolvido com [Claude Code](https://claude.com/claude-code)

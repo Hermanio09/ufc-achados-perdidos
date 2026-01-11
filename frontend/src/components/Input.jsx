@@ -13,14 +13,14 @@ const Input = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium mb-2" style={{color: '#333333'}}>
           {label}
-          {required && <span className="text-danger ml-1">*</span>}
+          {required && <span className="ml-1" style={{color: '#DC3545'}}>*</span>}
         </label>
       )}
       <div className="relative">
         {Icon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{color: '#666666'}}>
             <Icon size={20} />
           </div>
         )}
@@ -29,13 +29,16 @@ const Input = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`w-full px-4 py-3 ${Icon ? 'pl-11' : ''} border rounded-lg focus:outline-none focus:ring-2 focus:ring-ufc-blue focus:border-transparent ${
-            error ? 'border-danger' : 'border-gray-300'
-          }`}
+          className={`w-full px-4 py-3 ${Icon ? 'pl-11' : ''} border rounded-lg focus:outline-none focus:ring-2`}
+          style={{
+            borderColor: error ? '#DC3545' : '#E0E0E0',
+            color: '#333333',
+            backgroundColor: 'white'
+          }}
           {...props}
         />
       </div>
-      {error && <p className="mt-1 text-sm text-danger">{error}</p>}
+      {error && <p className="mt-1 text-sm" style={{color: '#DC3545'}}>{error}</p>}
     </div>
   );
 };

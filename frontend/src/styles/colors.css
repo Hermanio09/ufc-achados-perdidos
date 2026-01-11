@@ -1,0 +1,159 @@
+/* Paleta de Cores UFC Achados e Perdidos */
+
+/* Backgrounds */
+.bg-ufc-blue {
+  background-color: #004C8C !important;
+}
+
+.bg-ufc-blue-light {
+  background-color: #0066CC !important;
+}
+
+.bg-success {
+  background-color: #28A745 !important;
+}
+
+.bg-warning {
+  background-color: #FFC107 !important;
+}
+
+.bg-danger {
+  background-color: #DC3545 !important;
+}
+
+.bg-gray-dark {
+  background-color: #333333 !important;
+}
+
+.bg-gray-medium {
+  background-color: #666666 !important;
+}
+
+.bg-gray-light {
+  background-color: #F5F5F5 !important;
+}
+
+.bg-white {
+  background-color: #FFFFFF !important;
+}
+
+/* Text Colors */
+.text-ufc-blue {
+  color: #004C8C !important;
+}
+
+.text-ufc-blue-light {
+  color: #0066CC !important;
+}
+
+.text-success {
+  color: #28A745 !important;
+}
+
+.text-warning {
+  color: #FFC107 !important;
+}
+
+.text-danger {
+  color: #DC3545 !important;
+}
+
+.text-gray-dark {
+  color: #333333 !important;
+}
+
+.text-gray-medium {
+  color: #666666 !important;
+}
+
+.text-gray-light {
+  color: #F5F5F5 !important;
+}
+
+.text-white {
+  color: #FFFFFF !important;
+}
+
+/* Border Colors */
+.border-ufc-blue {
+  border-color: #004C8C !important;
+}
+
+.border-ufc-blue-light {
+  border-color: #0066CC !important;
+}
+
+.border-success {
+  border-color: #28A745 !important;
+}
+
+.border-warning {
+  border-color: #FFC107 !important;
+}
+
+.border-danger {
+  border-color: #DC3545 !important;
+}
+
+.border-gray-light {
+  border-color: #E0E0E0 !important;
+}
+
+/* Gradientes */
+.gradient-ufc {
+  background: linear-gradient(to bottom, #004C8C, #0066CC) !important;
+}
+
+/* Hover States */
+.hover-ufc-blue:hover {
+  background-color: #003366 !important;
+}
+
+.hover-ufc-blue-light:hover {
+  background-color: #0055AA !important;
+}
+
+.hover-success:hover {
+  background-color: #218838 !important;
+}
+
+.hover-danger:hover {
+  background-color: #C82333 !important;
+}
+
+/* Status Badges */
+.badge-success {
+  background-color: #28A745;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-warning {
+  background-color: #FFC107;
+  color: #333333;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-danger {
+  background-color: #DC3545;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-info {
+  background-color: #0066CC;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}

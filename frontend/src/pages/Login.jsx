@@ -53,7 +53,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-ufc-blue to-ufc-blue-light">
+    <div className="min-h-screen flex flex-col" style={{background: 'linear-gradient(to bottom, #004C8C, #0066CC)'}}>
       {/* Header */}
       <div className="pt-16 pb-8 text-center text-white">
         <GraduationCap size={48} className="mx-auto mb-4" />
@@ -87,7 +87,7 @@ const Login = () => {
           />
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-danger px-4 py-3 rounded-lg text-sm">
+            <div className="bg-red-50 border border-red-200 px-4 py-3 rounded-lg text-sm" style={{color: '#DC3545'}}>
               {error}
             </div>
           )}
@@ -103,12 +103,15 @@ const Login = () => {
           <div className="text-center">
             <Link
               to="/recuperar-senha"
-              className="text-ufc-blue-light text-sm hover:underline"
+              className="text-sm hover:underline"
+              style={{color: '#0066CC'}}
             >
               Esqueci minha senha
             </Link>
           </div>
+        </form>
 
+        <div className="max-w-md mx-auto mt-6">
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
@@ -119,11 +122,11 @@ const Login = () => {
           </div>
 
           <Link to="/cadastro">
-            <Button variant="secondary" fullWidth>
+            <Button type="button" variant="secondary" fullWidth>
               CRIAR CONTA
             </Button>
           </Link>
-        </form>
+        </div>
       </div>
 
       {/* Footer */}

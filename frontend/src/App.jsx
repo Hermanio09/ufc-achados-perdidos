@@ -1,9 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import ItemDetails from './pages/ItemDetails';
 import RegisterChoice from './pages/RegisterChoice';
 import RegisterFound from './pages/RegisterFound';
+import Chat from './pages/Chat';
+import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
 
 function App() {
   // Simples verificação de autenticação
@@ -21,6 +26,8 @@ function App() {
       <Routes>
         {/* Rotas públicas */}
         <Route path="/" element={<Login />} />
+        <Route path="/cadastro" element={<Register />} />
+        <Route path="/recuperar-senha" element={<ForgotPassword />} />
 
         {/* Rotas protegidas */}
         <Route
@@ -48,10 +55,34 @@ function App() {
           }
         />
         <Route
-          path="/registrar/encontrei"
+          path="/registrar/encontrado"
           element={
             <PrivateRoute>
               <RegisterFound />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <PrivateRoute>
+              <Chat />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/perfil"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/notificacoes"
+          element={
+            <PrivateRoute>
+              <Notifications />
             </PrivateRoute>
           }
         />

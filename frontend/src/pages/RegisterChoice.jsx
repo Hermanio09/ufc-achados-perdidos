@@ -5,9 +5,9 @@ const RegisterChoice = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{backgroundColor: '#F5F5F5'}}>
       {/* Header */}
-      <header className="bg-ufc-blue text-white p-4 shadow-lg">
+      <header className="text-white p-4 shadow-lg" style={{backgroundColor: '#004C8C'}}>
         <div className="flex items-center justify-between">
           <div className="text-center flex-1">
             <h1 className="font-bold text-lg">UFC ACHADOS E PERDIDOS</h1>
@@ -30,8 +30,8 @@ const RegisterChoice = () => {
           className="w-full bg-white rounded-xl shadow-md p-8 mb-4 hover:shadow-lg transition-all duration-200 text-left"
         >
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-              <Frown size={32} className="text-ufc-blue" />
+            <div className="flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center" style={{backgroundColor: '#E3F2FD'}}>
+              <Frown size={32} style={{color: '#004C8C'}} />
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold text-gray-900 mb-2">PERDI ALGO</h3>
@@ -44,12 +44,12 @@ const RegisterChoice = () => {
 
         {/* Found Item Card */}
         <button
-          onClick={() => navigate('/registrar/encontrei')}
+          onClick={() => navigate('/registrar/encontrado')}
           className="w-full bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition-all duration-200 text-left"
         >
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center">
-              <PartyPopper size={32} className="text-orange-500" />
+            <div className="flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center" style={{backgroundColor: '#E8F5E9'}}>
+              <PartyPopper size={32} style={{color: '#28A745'}} />
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold text-gray-900 mb-2">ENCONTREI ALGO</h3>
