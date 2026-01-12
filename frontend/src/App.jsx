@@ -10,6 +10,8 @@ import RegisterLost from './pages/RegisterLost';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
+import StaffDashboard from './pages/StaffDashboard';
+import StaffRegisterItem from './pages/StaffRegisterItem';
 
 function App() {
   // Simples verificação de autenticação
@@ -92,6 +94,22 @@ function App() {
           element={
             <PrivateRoute>
               <Notifications />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/dashboard"
+          element={
+            <PrivateRoute>
+              <StaffDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/registrar"
+          element={
+            <PrivateRoute>
+              <StaffRegisterItem />
             </PrivateRoute>
           }
         />

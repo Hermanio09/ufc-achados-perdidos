@@ -113,6 +113,24 @@ export const deleteItem = async (id) => {
   return response.data;
 };
 
+// ============= ADMIN/STAFF ITEMS =============
+
+export const getAllItemsAdmin = async (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  const response = await api.get(`/items/admin/all?${params}`);
+  return response.data;
+};
+
+export const markItemAsPortaria = async (id) => {
+  const response = await api.put(`/items/${id}/portaria`);
+  return response.data;
+};
+
+export const confirmItemReturn = async (id) => {
+  const response = await api.put(`/items/${id}/confirm-return`);
+  return response.data;
+};
+
 // ============= USERS =============
 
 export const getUser = async (id) => {
@@ -144,6 +162,28 @@ export const getMessages = async (conversationId) => {
 
 export const sendMessage = async (conversationId, text) => {
   const response = await api.post(`/conversations/${conversationId}/messages`, { text });
+  return response.data;
+};
+
+// ============= NOTIFICATIONS =============
+
+export const getNotifications = async () => {
+  const response = await api.get('/notifications');
+  return response.data;
+};
+
+export const markNotificationRead = async (id) => {
+  const response = await api.put(`/notifications/${id}/read`);
+  return response.data;
+};
+
+export const markAllNotificationsRead = async () => {
+  const response = await api.put('/notifications/read-all');
+  return response.data;
+};
+
+export const deleteNotification = async (id) => {
+  const response = await api.delete(`/notifications/${id}`);
   return response.data;
 };
 

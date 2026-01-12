@@ -24,6 +24,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/items', require('./routes/items'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/conversations', require('./routes/conversations'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // Rota de teste
 app.get('/', (req, res) => {

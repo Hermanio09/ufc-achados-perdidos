@@ -1,84 +1,122 @@
-import { ArrowLeft, Check, AlertTriangle, CheckCircle, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Check, AlertTriangle, CheckCircle, MessageCircle, Package, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../services/api';
 
 const Notifications = () => {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'match',
-      title: 'Possível match!',
-      message: 'Um fone de ouvido similar ao que você perdeu foi encontrado na Biblioteca.',
-      timestamp: '2h atrás',
-      read: false,
-      icon: AlertTriangle,
-      iconColor: 'text-warning',
-      bgColor: 'bg-yellow-50',
-      itemId: 1
-    },
-    {
-      id: 2,
-      type: 'message',
-      title: 'Nova mensagem',
-      message: 'Jayelly Santos enviou: "Pode me dar algum detalhe específico?"',
-      timestamp: '5h atrás',
-      read: false,
-      icon: MessageCircle,
-      iconColor: 'text-ufc-blue',
-      bgColor: 'bg-blue-50',
-      chatId: 1
-    },
-    {
-      id: 3,
-      type: 'claimed',
-      title: 'Alguém reivindicou seu item',
-      message: 'Pedro Mendes disse que a calculadora HP é dele. Verifique as informações.',
-      timestamp: '1d atrás',
-      read: true,
-      icon: AlertTriangle,
-      iconColor: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      itemId: 2
-    },
-    {
-      id: 4,
-      type: 'returned',
-      title: 'Item devolvido!',
-      message: 'Obrigado por ajudar! Você ganhou +10 pontos de reputação.',
-      timestamp: '2d atrás',
-      read: true,
-      icon: CheckCircle,
-      iconColor: 'text-success',
-      bgColor: 'bg-green-50',
-      itemId: 3
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await getNotifications();
+      if (response.success) {
+        setNotifications(response.data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar notificações:', error);
+      setNotifications([]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = (notificationId) => {
-    setNotifications(notifications.map(n =>
-      n.id === notificationId ? { ...n, read: true } : n
-    ));
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markNotificationRead(notificationId);
+      setNotifications(notifications.map(n =>
+        n._id === notificationId ? { ...n, read: true } : n
+      ));
+    } catch (error) {
+      console.error('Erro ao marcar notificação:', error);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllNotificationsRead();
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error('Erro ao marcar todas notificações:', error);
+    }
   };
 
   const handleNotificationClick = (notification) => {
-    markAsRead(notification.id);
+    handleMarkAsRead(notification._id);
 
     // Navegar baseado no tipo
-    if (notification.type === 'match' && notification.itemId) {
-      navigate(`/item/${notification.itemId}`);
-    } else if (notification.type === 'message' && notification.chatId) {
-      navigate('/chat');
-    } else if (notification.type === 'claimed' && notification.itemId) {
-      navigate(`/item/${notification.itemId}`);
+    if (notification.item) {
+      navigate(`/item/${notification.item._id || notification.item}`);
+    } else if (notification.conversation) {
+      navigate('/chat', { state: { conversationId: notification.conversation._id || notification.conversation } });
     }
   };
+
+  const getNotificationIcon = (type) => {
+    const icons = {
+      match: AlertTriangle,
+      message: MessageCircle,
+      claim: AlertTriangle,
+      return: CheckCircle,
+      portaria: Package,
+      system: Bell
+    };
+    return icons[type] || Bell;
+  };
+
+  const getNotificationColor = (type) => {
+    const colors = {
+      match: { icon: 'text-yellow-600', bg: 'bg-yellow-50' },
+      message: { icon: 'text-ufc-blue', bg: 'bg-blue-50' },
+      claim: { icon: 'text-orange-600', bg: 'bg-orange-50' },
+      return: { icon: 'text-green-600', bg: 'bg-green-50' },
+      portaria: { icon: 'text-blue-600', bg: 'bg-blue-50' },
+      system: { icon: 'text-gray-600', bg: 'bg-gray-50' }
+    };
+    return colors[type] || colors.system;
+  };
+
+  const formatTimestamp = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Agora';
+    if (diffMins < 60) return `${diffMins}min atrás`;
+    if (diffHours < 24) return `${diffHours}h atrás`;
+    if (diffDays === 1) return 'Ontem';
+    if (diffDays < 7) return `${diffDays}d atrás`;
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  const groupNotifications = () => {
+    const today = [];
+    const earlier = [];
+
+    notifications.forEach(notification => {
+      const timestamp = formatTimestamp(notification.createdAt);
+      if (timestamp.includes('h') || timestamp.includes('min') || timestamp === 'Agora') {
+        today.push(notification);
+      } else {
+        earlier.push(notification);
+      }
+    });
+
+    return { today, earlier };
+  };
+
+  const { today, earlier } = groupNotifications();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -95,7 +133,7 @@ const Notifications = () => {
             )}
           </div>
           <button
-            onClick={markAllAsRead}
+            onClick={handleMarkAllAsRead}
             disabled={unreadCount === 0}
             className="text-xs px-3 py-1 bg-white/10 rounded-full hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -106,7 +144,11 @@ const Notifications = () => {
 
       {/* Notificações */}
       <div className="p-4">
-        {notifications.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600">Carregando notificações...</p>
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check size={40} className="text-gray-400" />
@@ -117,30 +159,36 @@ const Notifications = () => {
         ) : (
           <div className="space-y-2">
             {/* Hoje */}
-            <div className="text-xs font-semibold text-gray-500 mb-2 mt-4">Hoje</div>
-            {notifications
-              .filter(n => n.timestamp.includes('h'))
-              .map(notification => (
-                <NotificationCard
-                  key={notification.id}
-                  notification={notification}
-                  onClick={() => handleNotificationClick(notification)}
-                />
-              ))}
+            {today.length > 0 && (
+              <>
+                <div className="text-xs font-semibold text-gray-500 mb-2 mt-4">Hoje</div>
+                {today.map(notification => (
+                  <NotificationCard
+                    key={notification._id}
+                    notification={notification}
+                    onClick={() => handleNotificationClick(notification)}
+                    getIcon={getNotificationIcon}
+                    getColor={getNotificationColor}
+                    formatTime={formatTimestamp}
+                  />
+                ))}
+              </>
+            )}
 
             {/* Anteriores */}
-            {notifications.some(n => n.timestamp.includes('d')) && (
+            {earlier.length > 0 && (
               <>
                 <div className="text-xs font-semibold text-gray-500 mb-2 mt-6">Anteriores</div>
-                {notifications
-                  .filter(n => n.timestamp.includes('d'))
-                  .map(notification => (
-                    <NotificationCard
-                      key={notification.id}
-                      notification={notification}
-                      onClick={() => handleNotificationClick(notification)}
-                    />
-                  ))}
+                {earlier.map(notification => (
+                  <NotificationCard
+                    key={notification._id}
+                    notification={notification}
+                    onClick={() => handleNotificationClick(notification)}
+                    getIcon={getNotificationIcon}
+                    getColor={getNotificationColor}
+                    formatTime={formatTimestamp}
+                  />
+                ))}
               </>
             )}
           </div>
@@ -150,8 +198,9 @@ const Notifications = () => {
   );
 };
 
-const NotificationCard = ({ notification, onClick }) => {
-  const Icon = notification.icon;
+const NotificationCard = ({ notification, onClick, getIcon, getColor, formatTime }) => {
+  const Icon = getIcon(notification.type);
+  const colors = getColor(notification.type);
 
   return (
     <button
@@ -164,8 +213,8 @@ const NotificationCard = ({ notification, onClick }) => {
     >
       <div className="p-4 flex gap-3">
         {/* Ícone */}
-        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.bgColor}`}>
-          <Icon className={notification.iconColor} size={20} />
+        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${colors.bg}`}>
+          <Icon className={colors.icon} size={20} />
         </div>
 
         {/* Conteúdo */}
@@ -175,12 +224,17 @@ const NotificationCard = ({ notification, onClick }) => {
               {notification.title}
             </h3>
             <span className="text-xs text-gray-500 whitespace-nowrap">
-              {notification.timestamp}
+              {formatTime(notification.createdAt)}
             </span>
           </div>
           <p className={`text-sm ${notification.read ? 'text-gray-500' : 'text-gray-700'}`}>
             {notification.message}
           </p>
+          {notification.item?.title && (
+            <p className="text-xs text-gray-400 mt-1">
+              Item: {notification.item.title}
+            </p>
+          )}
         </div>
 
         {/* Indicador não lido */}

@@ -1,8 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Tag, MapPin, Calendar, CheckCircle, MessageCircle, Star, MoreVertical, Package } from 'lucide-react';
+import { ArrowLeft, Tag, MapPin, Calendar, CheckCircle, MessageCircle, Star, MoreVertical, Package, Shield } from 'lucide-react';
 import Button from '../components/Button';
-import { getItem, claimItem, createOrGetConversation } from '../services/api';
+import { getItem, claimItem, createOrGetConversation, markItemAsPortaria, confirmItemReturn } from '../services/api';
 
 const ItemDetails = () => {
   const { id } = useParams();
@@ -57,6 +57,52 @@ const ItemDetails = () => {
     } catch (error) {
       console.error('Erro ao criar conversa:', error);
       alert(error.response?.data?.message || 'Erro ao iniciar conversa. Tente novamente.');
+    }
+  };
+
+  // Verificar se usuário é staff
+  const isStaff = () => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      return user.role === 'staff' || user.role === 'admin';
+    }
+    return false;
+  };
+
+  // Handler para marcar item como recebido na portaria (staff only)
+  const handleMarkAsPortaria = async () => {
+    if (!window.confirm('Marcar este item como recebido na portaria?')) {
+      return;
+    }
+
+    try {
+      const response = await markItemAsPortaria(id);
+      if (response.success) {
+        alert('Item marcado como recebido na portaria!');
+        fetchItem(); // Recarregar dados do item
+      }
+    } catch (error) {
+      console.error('Erro ao marcar item:', error);
+      alert(error.response?.data?.message || 'Erro ao marcar item. Tente novamente.');
+    }
+  };
+
+  // Handler para confirmar devolução (staff only)
+  const handleConfirmReturn = async () => {
+    if (!window.confirm('Confirmar a devolução deste item? Isso atualizará a reputação do usuário.')) {
+      return;
+    }
+
+    try {
+      const response = await confirmItemReturn(id);
+      if (response.success) {
+        alert('Devolução confirmada com sucesso!');
+        fetchItem(); // Recarregar dados do item
+      }
+    } catch (error) {
+      console.error('Erro ao confirmar devolução:', error);
+      alert(error.response?.data?.message || 'Erro ao confirmar devolução. Tente novamente.');
     }
   };
 
@@ -208,7 +254,50 @@ const ItemDetails = () => {
           </div>
         )}
 
-        {/* Actions */}
+        {/* Staff Actions */}
+        {isStaff() && item.type === 'found' && (
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield size={18} className="text-ufc-blue" />
+              <h3 className="font-semibold text-gray-900">Ações de Staff</h3>
+            </div>
+            <div className="space-y-2">
+              {!item.inPortaria && item.status === 'active' && (
+                <button
+                  onClick={handleMarkAsPortaria}
+                  className="w-full py-2.5 px-4 bg-ufc-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                >
+                  Receber na Portaria
+                </button>
+              )}
+
+              {item.status === 'claimed' && (
+                <button
+                  onClick={handleConfirmReturn}
+                  className="w-full py-2.5 px-4 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors text-sm"
+                >
+                  Confirmar Devolução
+                </button>
+              )}
+
+              {item.inPortaria && item.status === 'active' && (
+                <div className="py-2 px-4 bg-blue-100 text-blue-700 rounded-lg text-center text-sm font-medium flex items-center justify-center gap-2">
+                  <CheckCircle size={16} />
+                  Item na Portaria
+                </div>
+              )}
+
+              {item.status === 'returned' && (
+                <div className="py-2 px-4 bg-green-100 text-green-700 rounded-lg text-center text-sm font-medium flex items-center justify-center gap-2">
+                  <CheckCircle size={16} />
+                  Item Devolvido
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Regular Actions */}
         <div className="space-y-3">
           <Button
             onClick={handleClaim}

@@ -275,3 +275,147 @@ exports.deleteItem = async (req, res) => {
     });
   }
 };
+
+// ============= ROTAS ADMIN/STAFF =============
+
+// @desc    Ver todos os itens (staff/admin)
+// @route   GET /api/items/admin/all
+// @access  Private (staff/admin)
+exports.getAllItems = async (req, res) => {
+  try {
+    const { type, status, category, search } = req.query;
+
+    let query = {};
+
+    if (type) query.type = type;
+    if (status) query.status = status;
+    if (category) query.category = category;
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const items = await Item.find(query)
+      .populate('user', 'name email matricula curso')
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    res.json({
+      success: true,
+      count: items.length,
+      data: items
+    });
+  } catch (error) {
+    console.error('Erro ao buscar todos os itens:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao buscar itens',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Marcar item como "Na Portaria"
+// @route   PUT /api/items/:id/portaria
+// @access  Private (staff/admin)
+exports.markAsPortaria = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id).populate('user', 'name email');
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: 'Item não encontrado'
+      });
+    }
+
+    item.inPortaria = true;
+    await item.save();
+
+    // Criar notificação para o dono do item
+    const { createNotification } = require('./notificationsController');
+    await createNotification(
+      item.user._id,
+      'portaria',
+      'Item recebido na portaria',
+      `Seu item "${item.title}" foi recebido pela portaria`,
+      item._id
+    );
+
+    res.json({
+      success: true,
+      message: 'Item marcado como recebido na portaria',
+      data: item
+    });
+  } catch (error) {
+    console.error('Erro ao marcar item na portaria:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao atualizar item',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Confirmar devolução (staff/admin)
+// @route   PUT /api/items/:id/confirm-return
+// @access  Private (staff/admin)
+exports.confirmReturn = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id)
+      .populate('user', 'name email')
+      .populate('claimedBy', 'name email');
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: 'Item não encontrado'
+      });
+    }
+
+    item.status = 'returned';
+    item.returnedAt = Date.now();
+    await item.save();
+
+    // Criar notificações
+    const { createNotification } = require('./notificationsController');
+
+    // Notificar quem achou
+    if (item.user) {
+      await createNotification(
+        item.user._id,
+        'return',
+        'Devolução confirmada',
+        `Item "${item.title}" foi devolvido. +10 pontos de reputação!`,
+        item._id
+      );
+    }
+
+    // Notificar quem reivindicou
+    if (item.claimedBy) {
+      await createNotification(
+        item.claimedBy._id,
+        'return',
+        'Item devolvido',
+        `Você recebeu o item "${item.title}". Obrigado por usar o sistema!`,
+        item._id
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'Devolução confirmada com sucesso',
+      data: item
+    });
+  } catch (error) {
+    console.error('Erro ao confirmar devolução:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao confirmar devolução',
+      error: error.message
+    });
+  }
+};
