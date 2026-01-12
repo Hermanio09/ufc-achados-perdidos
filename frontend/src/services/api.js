@@ -108,6 +108,11 @@ export const getMyItems = async (type) => {
   return response.data;
 };
 
+export const deleteItem = async (id) => {
+  const response = await api.delete(`/items/${id}`);
+  return response.data;
+};
+
 // ============= USERS =============
 
 export const getUser = async (id) => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Settings, LogOut, Package, CheckCircle, Search, Star } from 'lucide-react';
+import { ArrowLeft, Settings, LogOut, Package, CheckCircle, Search, Star, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getMyItems } from '../services/api';
+import { getMyItems, deleteItem } from '../services/api';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -65,6 +65,28 @@ const Profile = () => {
       setFoundItems([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteItem = async (itemId, itemType) => {
+    if (!window.confirm('Tem certeza que deseja remover este item?')) {
+      return;
+    }
+
+    try {
+      const response = await deleteItem(itemId);
+      if (response.success) {
+        // Remover o item da lista local
+        if (itemType === 'lost') {
+          setLostItems(lostItems.filter(item => item._id !== itemId));
+        } else {
+          setFoundItems(foundItems.filter(item => item._id !== itemId));
+        }
+        alert('Item removido com sucesso!');
+      }
+    } catch (error) {
+      console.error('Erro ao remover item:', error);
+      alert('Erro ao remover item. Tente novamente.');
     }
   };
 
@@ -234,17 +256,27 @@ const Profile = () => {
                         </div>
                         {getStatusBadge(item.status)}
                       </div>
-                      {item.status === 'active' && (
-                        <div className="mt-3 pt-3 border-t border-gray-100">
+                      <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                        {item.status === 'active' && (
                           <button
                             onClick={() => navigate('/home')}
-                            className="w-full text-sm text-ufc-blue hover:bg-blue-50 py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                            className="flex-1 text-sm text-ufc-blue hover:bg-blue-50 py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2"
                           >
                             <Search size={16} />
-                            Buscar em itens encontrados
+                            Buscar
                           </button>
-                        </div>
-                      )}
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteItem(item._id, 'lost');
+                          }}
+                          className="text-sm text-red-600 hover:bg-red-50 py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Trash2 size={16} />
+                          Remover
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -266,25 +298,41 @@ const Profile = () => {
                   foundItems.map(item => (
                     <div
                       key={item._id}
-                      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/item/${item._id}`)}
+                      className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
-                          <p className="text-sm text-gray-600">
-                            <span className="text-ufc-blue font-medium">{item.category}</span> • {formatDate(item.createdAt)}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">{item.location}</p>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/item/${item._id}`)}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
+                            <p className="text-sm text-gray-600">
+                              <span className="text-ufc-blue font-medium">{item.category}</span> • {formatDate(item.createdAt)}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">{item.location}</p>
+                          </div>
+                          {getStatusBadge(item.status)}
                         </div>
-                        {getStatusBadge(item.status)}
+                        {item.status === 'returned' && (
+                          <div className="mt-2 flex items-center gap-1 text-sm text-green-600">
+                            <CheckCircle size={14} />
+                            <span>Obrigado por ajudar! +10 pontos de reputação</span>
+                          </div>
+                        )}
                       </div>
-                      {item.status === 'returned' && (
-                        <div className="mt-2 flex items-center gap-1 text-sm text-green-600">
-                          <CheckCircle size={14} />
-                          <span>Obrigado por ajudar! +10 pontos de reputação</span>
-                        </div>
-                      )}
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteItem(item._id, 'found');
+                          }}
+                          className="w-full text-sm text-red-600 hover:bg-red-50 py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Trash2 size={16} />
+                          Remover Item
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}

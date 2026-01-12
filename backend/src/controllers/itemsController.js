@@ -237,3 +237,41 @@ exports.getMyItems = async (req, res) => {
     });
   }
 };
+
+// @desc    Deletar item
+// @route   DELETE /api/items/:id
+// @access  Private
+exports.deleteItem = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: 'Item não encontrado'
+      });
+    }
+
+    // Verificar se o usuário é o dono do item
+    if (item.user.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Você não tem permissão para deletar este item'
+      });
+    }
+
+    await Item.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: 'Item removido com sucesso'
+    });
+  } catch (error) {
+    console.error('Erro ao deletar item:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao remover item',
+      error: error.message
+    });
+  }
+};
