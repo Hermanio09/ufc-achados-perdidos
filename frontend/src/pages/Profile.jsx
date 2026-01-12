@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Settings, LogOut, Package, CheckCircle, Search, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,16 +6,33 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('perdidos');
 
-  // Mock data - dados do usuário
-  const user = {
-    name: 'Lucas Olivera',
-    email: 'lucas.olivera@alu.ufc.br',
-    matricula: '123456',
-    curso: 'Engenharia de Software',
-    semestre: '5º semestre',
-    reputation: 4.8,
-    avatar: 'https://ui-avatars.com/api/?name=Lucas+Olivera&background=004C8C&color=fff&size=128'
+  // Pegar dados reais do usuário logado
+  const getUserData = () => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      return {
+        name: parsedUser.nome || parsedUser.name || 'Usuário',
+        email: parsedUser.email || 'email@ufc.br',
+        matricula: parsedUser.matricula || 'N/A',
+        curso: parsedUser.curso || 'N/A',
+        semestre: parsedUser.semestre || 'N/A',
+        reputation: parsedUser.reputation || 5.0,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(parsedUser.nome || parsedUser.name || 'Usuario')}&background=004C8C&color=fff&size=128`
+      };
+    }
+    return {
+      name: 'Usuário',
+      email: 'email@ufc.br',
+      matricula: 'N/A',
+      curso: 'N/A',
+      semestre: 'N/A',
+      reputation: 5.0,
+      avatar: 'https://ui-avatars.com/api/?name=Usuario&background=004C8C&color=fff&size=128'
+    };
   };
+
+  const user = getUserData();
 
   // Mock data - estatísticas
   const stats = {
