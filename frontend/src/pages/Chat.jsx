@@ -7,8 +7,15 @@ const Chat = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [message, setMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { id: 1, sender: 'other', text: 'Oi! Você disse que esse fone é seu?', timestamp: '14:30' },
+    { id: 2, sender: 'me', text: 'Sim! Perdi ele ontem na biblioteca!', timestamp: '14:32' },
+    { id: 3, sender: 'other', text: 'Pode me dizer algum detalhe específico pra confirmar?', timestamp: '14:33' },
+    { id: 4, sender: 'me', text: 'Ele tem um pequeno arranhão na parte direita', timestamp: '14:34' },
+    { id: 5, sender: 'other', text: 'Perfeito! É esse mesmo. Entreguei na portaria.', timestamp: '14:35' }
+  ]);
 
-  // Mock data - conversas
+  // Mock data - conversas (apenas 1 para demonstração)
   const conversations = [
     {
       id: 1,
@@ -16,37 +23,13 @@ const Chat = () => {
       itemTitle: 'Fone de ouvido preto',
       lastMessage: 'Sim! Perdi ele ontem na biblioteca!',
       timestamp: '14:32',
-      unread: 2,
+      unread: 0,
       avatar: 'https://ui-avatars.com/api/?name=Jayelly+Santos&background=004C8C&color=fff'
-    },
-    {
-      id: 2,
-      userName: 'Pedro Mendes',
-      itemTitle: 'Calculadora HP',
-      lastMessage: 'Pode me dar algum detalhe específico?',
-      timestamp: '2h atrás',
-      unread: 0,
-      avatar: 'https://ui-avatars.com/api/?name=Pedro+Mendes&background=004C8C&color=fff'
-    },
-    {
-      id: 3,
-      userName: 'Maria Lima',
-      itemTitle: 'Chave com chaveiro UFC',
-      lastMessage: 'Obrigado por ajudar!',
-      timestamp: '1d atrás',
-      unread: 0,
-      avatar: 'https://ui-avatars.com/api/?name=Maria+Lima&background=004C8C&color=fff'
     }
   ];
 
-  // Mock data - mensagens da conversa selecionada
-  const messages = selectedConversation ? [
-    { id: 1, sender: 'other', text: 'Oi! Você disse que esse fone é seu?', timestamp: '14:30' },
-    { id: 2, sender: 'me', text: 'Sim! Perdi ele ontem na biblioteca!', timestamp: '14:32' },
-    { id: 3, sender: 'other', text: 'Pode me dizer algum detalhe específico pra confirmar?', timestamp: '14:33' },
-    { id: 4, sender: 'me', text: 'Ele tem um pequeno arranhão na parte direita', timestamp: '14:34' },
-    { id: 5, sender: 'other', text: 'Perfeito! É esse mesmo. Entreguei na portaria.', timestamp: '14:35' }
-  ] : [];
+  // Mensagens da conversa selecionada
+  const messages = selectedConversation ? chatMessages : [];
 
   const filteredConversations = conversations.filter(conv =>
     conv.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -55,9 +38,18 @@ const Chat = () => {
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      // Aqui enviaria a mensagem para o backend
-      console.log('Enviando mensagem:', message);
+      // Adicionar mensagem ao estado local
+      const newMessage = {
+        id: chatMessages.length + 1,
+        sender: 'me',
+        text: message.trim(),
+        timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      };
+      setChatMessages([...chatMessages, newMessage]);
       setMessage('');
+
+      // Em produção, aqui enviaria a mensagem para o backend via API
+      // await sendMessage({ conversationId: selectedConversation.id, text: message });
     }
   };
 

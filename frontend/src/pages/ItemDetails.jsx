@@ -1,25 +1,34 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Tag, MapPin, Calendar, CheckCircle, MessageCircle, Star, MoreVertical } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Tag, MapPin, Calendar, CheckCircle, MessageCircle, Star, MoreVertical, Package } from 'lucide-react';
 import Button from '../components/Button';
+import { getItem } from '../services/api';
 
 const ItemDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Dados mockados (depois virão da API)
-  const item = {
-    id: 1,
-    title: 'Fone de Ouvido Bluetooth',
-    category: 'Eletrônicos',
-    location: 'Biblioteca - 2º andar',
-    date: '03/01/2026',
-    status: 'Na portaria',
-    description: 'Fone de ouvido Bluetooth, cor preta com detalhes em vermelho, encontrado na mesa próxima à janela da biblioteca.',
-    image: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600',
-    foundBy: {
-      name: 'Jayelly S.',
-      rating: 4.8,
-      returns: 12
+  useEffect(() => {
+    fetchItem();
+  }, [id]);
+
+  const fetchItem = async () => {
+    try {
+      setLoading(true);
+      const response = await getItem(id);
+      if (response.success) {
+        setItem(response.data);
+      } else {
+        setError('Item não encontrado');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar item:', err);
+      setError('Erro ao carregar item');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -30,29 +39,90 @@ const ItemDetails = () => {
 
   const handleMessage = () => {
     // Lógica para enviar mensagem
-    navigate(`/chat/${item.foundBy.name}`);
+    if (item?.user?._id) {
+      navigate(`/chat/${item.user._id}`);
+    }
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Recente';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  const getStatusText = (status, inPortaria) => {
+    if (status === 'returned') return 'Devolvido';
+    if (status === 'claimed') return 'Reivindicado';
+    if (inPortaria) return 'Na portaria';
+    return 'Disponível';
+  };
+
+  const imageUrl = item?.image?.startsWith('http')
+    ? item.image
+    : item?.image
+    ? `${import.meta.env.VITE_API_URL?.replace('/api', '')}${item.image}`
+    : null;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ufc-blue"></div>
+      </div>
+    );
+  }
+
+  if (error || !item) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-ufc-blue text-white p-4 flex items-center">
+          <button onClick={() => navigate(-1)} className="p-2">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="font-semibold ml-2">Detalhes do Item</h1>
+        </header>
+        <div className="flex flex-col items-center justify-center py-12 px-4">
+          <Package size={64} className="text-gray-300 mb-4" />
+          <p className="text-gray-600 text-center">{error || 'Item não encontrado'}</p>
+          <button
+            onClick={() => navigate('/home')}
+            className="mt-4 text-ufc-blue hover:underline"
+          >
+            Voltar para Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <header className="bg-gray-900 text-white p-4 flex items-center justify-between">
+      <header className="bg-ufc-blue text-white p-4 flex items-center justify-between">
         <button onClick={() => navigate(-1)} className="p-2">
           <ArrowLeft size={24} />
         </button>
         <h1 className="font-semibold">Detalhes do Item</h1>
-        <button className="p-2">
+        <button className="p-2 opacity-0">
           <MoreVertical size={24} />
         </button>
       </header>
 
       {/* Image */}
       <div className="bg-white">
-        <img
-          src={item.image}
-          alt={item.title}
-          className="w-full aspect-square object-cover"
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={item.title}
+            className="w-full aspect-square object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.parentElement.querySelector('.placeholder')?.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+        <div className={`w-full aspect-square flex items-center justify-center bg-gray-100 ${imageUrl ? 'hidden' : ''} placeholder`}>
+          <Package size={64} className="text-gray-300" />
+        </div>
       </div>
 
       {/* Content */}
@@ -80,8 +150,10 @@ const ItemDetails = () => {
           <div className="flex items-center text-gray-700">
             <Calendar size={20} className="mr-3 text-ufc-blue" />
             <div>
-              <span className="text-sm text-gray-500">Encontrado:</span>
-              <span className="ml-2 font-medium">{item.date}</span>
+              <span className="text-sm text-gray-500">
+                {item.type === 'lost' ? 'Perdido em:' : 'Encontrado em:'}
+              </span>
+              <span className="ml-2 font-medium">{formatDate(item.createdAt)}</span>
             </div>
           </div>
 
@@ -89,7 +161,7 @@ const ItemDetails = () => {
             <CheckCircle size={20} className="mr-3 text-success" />
             <div>
               <span className="text-sm text-gray-500">Status:</span>
-              <span className="ml-2 font-medium text-success">{item.status}</span>
+              <span className="ml-2 font-medium text-success">{getStatusText(item.status, item.inPortaria)}</span>
             </div>
           </div>
         </div>
@@ -100,24 +172,25 @@ const ItemDetails = () => {
           <p className="text-gray-600 leading-relaxed">{item.description}</p>
         </div>
 
-        {/* Found By */}
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-ufc-blue rounded-full flex items-center justify-center text-white font-semibold">
-                {item.foundBy.name.charAt(0)}
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">{item.foundBy.name}</p>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Star size={14} className="text-warning fill-warning" />
-                  <span>{item.foundBy.rating}</span>
-                  <span>({item.foundBy.returns} devoluções)</span>
+        {/* Found/Posted By */}
+        {item.user && (
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-ufc-blue rounded-full flex items-center justify-center text-white font-semibold">
+                  {item.user.name?.charAt(0) || 'U'}
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">{item.user.name || 'Usuário'}</p>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Star size={14} className="text-warning fill-warning" />
+                    <span>{item.user.reputation || 5.0}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Actions */}
         <div className="space-y-3">

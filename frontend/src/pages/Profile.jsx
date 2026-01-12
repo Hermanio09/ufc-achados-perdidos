@@ -222,8 +222,7 @@ const Profile = () => {
                   lostItems.map(item => (
                     <div
                       key={item._id}
-                      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/item/${item._id}`)}
+                      className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
@@ -236,10 +235,15 @@ const Profile = () => {
                         {getStatusBadge(item.status)}
                       </div>
                       {item.status === 'active' && (
-                        <button className="mt-2 text-sm text-ufc-blue hover:underline flex items-center gap-1">
-                          <Search size={14} />
-                          Ver se alguém encontrou
-                        </button>
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <button
+                            onClick={() => navigate('/home')}
+                            className="w-full text-sm text-ufc-blue hover:bg-blue-50 py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Search size={16} />
+                            Buscar em itens encontrados
+                          </button>
+                        </div>
                       )}
                     </div>
                   ))

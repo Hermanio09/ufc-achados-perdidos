@@ -153,10 +153,3 @@ Todos os artefatos do Design Thinking estão disponíveis em `/docs`:
 **Hermanio Santana Chaves**
 - Engenharia de Software - UFC Campus Russas
 
-## Licença
-
-Este projeto foi desenvolvido para fins acadêmicos.
-
----
-
-Desenvolvido com [Claude Code](https://claude.com/claude-code)
