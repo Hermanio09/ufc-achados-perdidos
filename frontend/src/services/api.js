@@ -125,4 +125,26 @@ export const updateProfile = async (userData) => {
   return response.data;
 };
 
+// ============= CONVERSATIONS =============
+
+export const createOrGetConversation = async (itemId) => {
+  const response = await api.post('/conversations', { itemId });
+  return response.data;
+};
+
+export const getMyConversations = async () => {
+  const response = await api.get('/conversations');
+  return response.data;
+};
+
+export const getMessages = async (conversationId) => {
+  const response = await api.get(`/conversations/${conversationId}/messages`);
+  return response.data;
+};
+
+export const sendMessage = async (conversationId, text) => {
+  const response = await api.post(`/conversations/${conversationId}/messages`, { text });
+  return response.data;
+};
+
 export default api;

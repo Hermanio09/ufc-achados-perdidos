@@ -1,55 +1,130 @@
-import { useState } from 'react';
-import { ArrowLeft, Send, Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Send, Search, Package } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { getMyConversations, getMessages, sendMessage as sendMessageAPI } from '../services/api';
 
 const Chat = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [chatMessages, setChatMessages] = useState([
-    { id: 1, sender: 'other', text: 'Oi! Você disse que esse fone é seu?', timestamp: '14:30' },
-    { id: 2, sender: 'me', text: 'Sim! Perdi ele ontem na biblioteca!', timestamp: '14:32' },
-    { id: 3, sender: 'other', text: 'Pode me dizer algum detalhe específico pra confirmar?', timestamp: '14:33' },
-    { id: 4, sender: 'me', text: 'Ele tem um pequeno arranhão na parte direita', timestamp: '14:34' },
-    { id: 5, sender: 'other', text: 'Perfeito! É esse mesmo. Entreguei na portaria.', timestamp: '14:35' }
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
-  // Mock data - conversas (apenas 1 para demonstração)
-  const conversations = [
-    {
-      id: 1,
-      userName: 'Jayelly Santos',
-      itemTitle: 'Fone de ouvido preto',
-      lastMessage: 'Sim! Perdi ele ontem na biblioteca!',
-      timestamp: '14:32',
-      unread: 0,
-      avatar: 'https://ui-avatars.com/api/?name=Jayelly+Santos&background=004C8C&color=fff'
+  // Pegar ID do usuário logado
+  const getCurrentUserId = () => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      return parsedUser._id || parsedUser.id;
     }
-  ];
+    return null;
+  };
 
-  // Mensagens da conversa selecionada
-  const messages = selectedConversation ? chatMessages : [];
+  const currentUserId = getCurrentUserId();
 
-  const filteredConversations = conversations.filter(conv =>
-    conv.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.itemTitle.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Buscar conversas ao carregar
+  useEffect(() => {
+    fetchConversations();
+  }, []);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      // Adicionar mensagem ao estado local
-      const newMessage = {
-        id: chatMessages.length + 1,
-        sender: 'me',
-        text: message.trim(),
-        timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      };
-      setChatMessages([...chatMessages, newMessage]);
-      setMessage('');
+  // Se veio de ItemDetails com conversationId, selecionar automaticamente
+  useEffect(() => {
+    if (location.state?.conversationId && conversations.length > 0) {
+      const conv = conversations.find(c => c._id === location.state.conversationId);
+      if (conv) {
+        handleSelectConversation(conv);
+      }
+    }
+  }, [location.state, conversations]);
 
-      // Em produção, aqui enviaria a mensagem para o backend via API
-      // await sendMessage({ conversationId: selectedConversation.id, text: message });
+  const fetchConversations = async () => {
+    try {
+      setLoading(true);
+      const response = await getMyConversations();
+      if (response.success) {
+        setConversations(response.data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar conversas:', error);
+      setConversations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectConversation = async (conv) => {
+    setSelectedConversation(conv);
+    setLoadingMessages(true);
+
+    try {
+      const response = await getMessages(conv._id);
+      if (response.success) {
+        setMessages(response.data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar mensagens:', error);
+      setMessages([]);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const formatTimestamp = (date) => {
+    const d = new Date(date);
+    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatConversationTime = (date) => {
+    const d = new Date(date);
+    const now = new Date();
+    const diffMs = now - d;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) {
+      return `${diffMins}min`;
+    } else if (diffHours < 24) {
+      return `${diffHours}h`;
+    } else if (diffDays < 7) {
+      return `${diffDays}d`;
+    } else {
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    }
+  };
+
+  const getOtherUser = (conv) => {
+    return conv.participants.find(p => p._id !== currentUserId);
+  };
+
+  const filteredConversations = conversations.filter(conv => {
+    const otherUser = getOtherUser(conv);
+    return (
+      otherUser?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      conv.item?.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  const handleSendMessage = async () => {
+    if (message.trim() && selectedConversation) {
+      const messageText = message.trim();
+      setMessage(''); // Limpar input imediatamente
+
+      try {
+        const response = await sendMessageAPI(selectedConversation._id, messageText);
+        if (response.success) {
+          // Adicionar mensagem à lista local
+          setMessages([...messages, response.data]);
+        }
+      } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        alert('Erro ao enviar mensagem. Tente novamente.');
+        setMessage(messageText); // Restaurar mensagem em caso de erro
+      }
     }
   };
 
@@ -89,42 +164,56 @@ const Chat = () => {
 
           {/* Conversas */}
           <div className="flex-1 overflow-y-auto">
-            {filteredConversations.map(conv => (
-              <button
-                key={conv.id}
-                onClick={() => setSelectedConversation(conv)}
-                className={`w-full p-4 border-b hover:bg-gray-50 transition-colors text-left ${
-                  selectedConversation?.id === conv.id ? 'bg-blue-50' : ''
-                }`}
-              >
-                <div className="flex gap-3">
-                  <img
-                    src={conv.avatar}
-                    alt={conv.userName}
-                    className="w-12 h-12 rounded-full flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-semibold text-sm text-gray-900 truncate">
-                        {conv.userName}
-                      </h3>
-                      <span className="text-xs text-gray-500">{conv.timestamp}</span>
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ufc-blue"></div>
+              </div>
+            ) : filteredConversations.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-gray-500">
+                <Package size={48} className="mb-3 text-gray-300" />
+                <p className="text-center font-medium">Nenhuma conversa</p>
+                <p className="text-sm text-center mt-2">As conversas sobre itens aparecerão aqui</p>
+              </div>
+            ) : (
+              filteredConversations.map(conv => {
+                const otherUser = getOtherUser(conv);
+                const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser?.name || 'U')}&background=004C8C&color=fff`;
+
+                return (
+                  <button
+                    key={conv._id}
+                    onClick={() => handleSelectConversation(conv)}
+                    className={`w-full p-4 border-b hover:bg-gray-50 transition-colors text-left ${
+                      selectedConversation?._id === conv._id ? 'bg-blue-50' : ''
+                    }`}
+                  >
+                    <div className="flex gap-3">
+                      <img
+                        src={avatar}
+                        alt={otherUser?.name}
+                        className="w-12 h-12 rounded-full flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h3 className="font-semibold text-sm text-gray-900 truncate">
+                            {otherUser?.name || 'Usuário'}
+                          </h3>
+                          <span className="text-xs text-gray-500">
+                            {formatConversationTime(conv.lastMessageAt)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-ufc-blue font-medium mb-1 truncate">
+                          Item: {conv.item?.title || 'Item'}
+                        </p>
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-gray-600 truncate">{conv.lastMessage}</p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-ufc-blue font-medium mb-1 truncate">
-                      Item: {conv.itemTitle}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-gray-600 truncate">{conv.lastMessage}</p>
-                      {conv.unread > 0 && (
-                        <span className="bg-ufc-blue text-white text-xs rounded-full px-2 py-1 ml-2">
-                          {conv.unread}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </button>
-            ))}
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -141,43 +230,56 @@ const Chat = () => {
                   <ArrowLeft size={20} />
                 </button>
                 <img
-                  src={selectedConversation.avatar}
-                  alt={selectedConversation.userName}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(getOtherUser(selectedConversation)?.name || 'U')}&background=004C8C&color=fff`}
+                  alt={getOtherUser(selectedConversation)?.name}
                   className="w-10 h-10 rounded-full"
                 />
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">
-                    {selectedConversation.userName}
+                    {getOtherUser(selectedConversation)?.name || 'Usuário'}
                   </h3>
                   <p className="text-xs text-gray-600">
-                    {selectedConversation.itemTitle}
+                    {selectedConversation.item?.title || 'Item'}
                   </p>
                 </div>
               </div>
 
               {/* Mensagens */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-                {messages.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                        msg.sender === 'me'
-                          ? 'bg-ufc-blue text-white'
-                          : 'bg-white text-gray-900 border border-gray-200'
-                      }`}
-                    >
-                      <p className="text-sm">{msg.text}</p>
-                      <span className={`text-xs mt-1 block ${
-                        msg.sender === 'me' ? 'text-blue-100' : 'text-gray-500'
-                      }`}>
-                        {msg.timestamp}
-                      </span>
-                    </div>
+                {loadingMessages ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ufc-blue"></div>
                   </div>
-                ))}
+                ) : messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <p>Nenhuma mensagem ainda. Envie a primeira!</p>
+                  </div>
+                ) : (
+                  messages.map(msg => {
+                    const isMyMessage = msg.sender._id === currentUserId;
+                    return (
+                      <div
+                        key={msg._id}
+                        className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                            isMyMessage
+                              ? 'bg-ufc-blue text-white'
+                              : 'bg-white text-gray-900 border border-gray-200'
+                          }`}
+                        >
+                          <p className="text-sm">{msg.text}</p>
+                          <span className={`text-xs mt-1 block ${
+                            isMyMessage ? 'text-blue-100' : 'text-gray-500'
+                          }`}>
+                            {formatTimestamp(msg.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
 
               {/* Input de Mensagem */}

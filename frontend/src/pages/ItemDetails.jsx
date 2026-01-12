@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Tag, MapPin, Calendar, CheckCircle, MessageCircle, Star, MoreVertical, Package } from 'lucide-react';
 import Button from '../components/Button';
-import { getItem, claimItem } from '../services/api';
+import { getItem, claimItem, createOrGetConversation } from '../services/api';
 
 const ItemDetails = () => {
   const { id } = useParams();
@@ -46,9 +46,18 @@ const ItemDetails = () => {
     }
   };
 
-  const handleMessage = () => {
-    // Redirecionar para a página de chat geral
-    navigate('/chat');
+  const handleMessage = async () => {
+    try {
+      // Criar ou buscar conversa existente
+      const response = await createOrGetConversation(id);
+      if (response.success) {
+        // Redirecionar para chat com a conversa selecionada
+        navigate('/chat', { state: { conversationId: response.data._id } });
+      }
+    } catch (error) {
+      console.error('Erro ao criar conversa:', error);
+      alert(error.response?.data?.message || 'Erro ao iniciar conversa. Tente novamente.');
+    }
   };
 
   const formatDate = (dateString) => {
