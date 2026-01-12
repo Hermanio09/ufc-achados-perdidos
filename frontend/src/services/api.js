@@ -42,6 +42,13 @@ api.interceptors.response.use(
 
 export const register = async (userData) => {
   const response = await api.post('/auth/register', userData);
+  if (response.data.success) {
+    localStorage.setItem('token', response.data.data.token);
+    // Salvar dados do usuário no localStorage
+    if (response.data.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.data.user));
+    }
+  }
   return response.data;
 };
 
@@ -49,6 +56,10 @@ export const login = async (credentials) => {
   const response = await api.post('/auth/login', credentials);
   if (response.data.success) {
     localStorage.setItem('token', response.data.data.token);
+    // Salvar dados do usuário no localStorage
+    if (response.data.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.data.user));
+    }
   }
   return response.data;
 };

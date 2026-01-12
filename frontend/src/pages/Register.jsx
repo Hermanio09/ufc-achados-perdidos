@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Hash, BookOpen, Calendar, GraduationCap, Briefcase, Key } from 'lucide-react';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import { register as apiRegister } from '../services/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -121,19 +122,26 @@ const Register = () => {
     }
 
     try {
-      // Aqui será feita a chamada para a API
       const userData = {
-        ...formData,
+        nome: formData.name,
+        email: formData.email,
+        senha: formData.password,
+        matricula: formData.matricula,
+        curso: formData.curso,
+        semestre: formData.semestre,
         role: userType === 'staff' ? 'staff' : 'student'
       };
 
-      // Por enquanto, simula cadastro
-      setTimeout(() => {
-        localStorage.setItem('token', 'fake-token');
+      const response = await apiRegister(userData);
+
+      if (response.success) {
         navigate('/home');
-      }, 1000);
+      } else {
+        setError(response.message || 'Erro ao criar conta');
+        setLoading(false);
+      }
     } catch (err) {
-      setError('Erro ao criar conta. Tente novamente.');
+      setError(err.response?.data?.message || 'Erro ao criar conta. Tente novamente.');
       setLoading(false);
     }
   };

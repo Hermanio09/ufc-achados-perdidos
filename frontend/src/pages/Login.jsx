@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, GraduationCap } from 'lucide-react';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import { login as apiLogin } from '../services/api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -40,14 +41,19 @@ const Login = () => {
     }
 
     try {
-      // Aqui será feita a chamada para a API
-      // Por enquanto, simula login
-      setTimeout(() => {
-        localStorage.setItem('token', 'fake-token');
+      const response = await apiLogin({
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (response.success) {
         navigate('/home');
-      }, 1000);
+      } else {
+        setError(response.message || 'Erro ao fazer login');
+        setLoading(false);
+      }
     } catch (err) {
-      setError('Erro ao fazer login. Tente novamente.');
+      setError(err.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.');
       setLoading(false);
     }
   };
