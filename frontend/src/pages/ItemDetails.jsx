@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Tag, MapPin, Calendar, CheckCircle, MessageCircle, Star, MoreVertical, Package } from 'lucide-react';
 import Button from '../components/Button';
-import { getItem } from '../services/api';
+import { getItem, claimItem } from '../services/api';
 
 const ItemDetails = () => {
   const { id } = useParams();
@@ -32,16 +32,23 @@ const ItemDetails = () => {
     }
   };
 
-  const handleClaim = () => {
-    // Lógica para reivindicar o item
-    navigate(`/reivindicar/${id}`);
+  const handleClaim = async () => {
+    try {
+      const response = await claimItem(id);
+      if (response.success) {
+        alert('Item reivindicado com sucesso! Entre em contato com quem encontrou para combinar a devolução.');
+        // Atualizar o item local
+        setItem({ ...item, status: 'claimed' });
+      }
+    } catch (error) {
+      console.error('Erro ao reivindicar item:', error);
+      alert(error.response?.data?.message || 'Erro ao reivindicar item. Tente novamente.');
+    }
   };
 
   const handleMessage = () => {
-    // Lógica para enviar mensagem
-    if (item?.user?._id) {
-      navigate(`/chat/${item.user._id}`);
-    }
+    // Redirecionar para a página de chat geral
+    navigate('/chat');
   };
 
   const formatDate = (dateString) => {

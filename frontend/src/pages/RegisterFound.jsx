@@ -36,7 +36,6 @@ const RegisterFound = () => {
     'Laboratório',
     'Corredor',
     'Banheiro',
-    'Quadra',
     'Estacionamento',
     'Outro'
   ];
