@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Bell, Menu, Home as HomeIcon, MessageCircle, User, Plus, MapPin } from 'lucide-react';
 import ItemCard from '../components/ItemCard';
 import Sidebar from '../components/Sidebar';
 import { useNavigate } from 'react-router-dom';
+import { getFoundItems } from '../services/api';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -10,75 +11,45 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dados mockados dos itens (depois virão da API)
-  const items = [
-    {
-      id: 1,
-      title: 'Fone JBL Preto',
-      category: 'Eletrônicos',
-      location: 'Biblioteca - 2º andar',
-      date: '2h atrás',
-      status: 'Na portaria',
-      image: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400'
-    },
-    {
-      id: 2,
-      title: 'Calculadora HP',
-      category: 'Eletrônicos',
-      location: 'Sala 101',
-      date: '5h atrás',
-      status: 'Na portaria',
-      image: 'https://images.unsplash.com/photo-1587145820266-a5951ee6f620?w=400'
-    },
-    {
-      id: 3,
-      title: 'Chave c/ chaveiro UFC',
-      category: 'Chaves',
-      location: '3º andar',
-      date: '1d atrás',
-      status: 'Na portaria',
-      image: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=400'
-    },
-    {
-      id: 4,
-      title: 'Garrafa de água',
-      category: 'Acessórios',
-      location: 'Cantina',
-      date: '2h atrás',
-      status: 'Na portaria',
-      image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400'
-    },
-    {
-      id: 5,
-      title: 'Fone de ouvido',
-      category: 'Eletrônicos',
-      location: 'Biblioteca',
-      date: '3h atrás',
-      status: 'Na portaria',
-      image: 'https://images.unsplash.com/photo-1545127398-14699f92334b?w=400'
-    },
-    {
-      id: 6,
-      title: 'Celular',
-      category: 'Eletrônicos',
-      location: 'Quadra',
-      date: '1d atrás',
-      status: 'Na portaria',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400'
+  // Buscar itens encontrados da API
+  useEffect(() => {
+    fetchItems();
+  }, [selectedCategory, searchTerm]);
+
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      const filters = {};
+
+      if (selectedCategory !== 'Todos') {
+        filters.category = selectedCategory;
+      }
+
+      if (searchTerm) {
+        filters.search = searchTerm;
+      }
+
+      const response = await getFoundItems(filters);
+
+      if (response.success) {
+        setItems(response.data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar itens:', error);
+      setItems([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const categories = ['Todos', 'Eletrônicos', 'Documentos', 'Chaves', 'Acessórios'];
+  const categories = ['Todos', 'Eletrônicos', 'Documentos', 'Chaves', 'Acessórios', 'Roupas', 'Livros', 'Carteiras', 'Outros'];
 
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory;
-    const matchesLocation = !selectedLocation || item.location.toLowerCase().includes(selectedLocation.toLowerCase());
-
-    return matchesSearch && matchesCategory && matchesLocation;
-  });
+  const filteredItems = selectedLocation
+    ? items.filter(item => item.location?.toLowerCase().includes(selectedLocation.toLowerCase()))
+    : items;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -153,22 +124,30 @@ const Home = () => {
       {/* Items Grid */}
       <div className="p-4">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Encontrados Recentemente
+          Encontrados Recentemente ({filteredItems.length})
         </h2>
-        <div className="grid grid-cols-2 gap-4">
-          {filteredItems.map(item => (
-            <ItemCard
-              key={item.id}
-              item={item}
-              onClick={() => navigate(`/item/${item.id}`)}
-            />
-          ))}
-        </div>
 
-        {filteredItems.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            <p>Nenhum item encontrado</p>
-            <p className="text-sm mt-2">Tente buscar com outros termos</p>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ufc-blue"></div>
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
+            <p className="font-medium text-gray-700">Nenhum item encontrado</p>
+            <p className="text-sm mt-2">Tente buscar com outros termos ou registre um item encontrado</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            {filteredItems.map(item => (
+              <ItemCard
+                key={item._id || item.id}
+                item={{
+                  ...item,
+                  id: item._id || item.id
+                }}
+                onClick={() => navigate(`/item/${item._id || item.id}`)}
+              />
+            ))}
           </div>
         )}
       </div>
