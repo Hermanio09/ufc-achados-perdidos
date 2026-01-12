@@ -15,9 +15,10 @@ const userSchema = new mongoose.Schema({
     trim: true,
     validate: {
       validator: function(v) {
-        return /^[^\s@]+@alu\.ufc\.br$/.test(v);
+        // Aceitar @alu.ufc.br para estudantes e @ufc.br para staff/admin
+        return /^[^\s@]+@(alu\.)?ufc\.br$/.test(v);
       },
-      message: 'Use seu email institucional (@alu.ufc.br)'
+      message: 'Use seu email institucional (@alu.ufc.br ou @ufc.br)'
     }
   },
   password: {

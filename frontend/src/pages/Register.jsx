@@ -21,8 +21,8 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Código de acesso da portaria (em produção, isso viria do backend)
-  const CODIGO_PORTARIA = 'PORTARIA2026';
+  // Código de acesso da portaria (fixo para apresentação)
+  const CODIGO_PORTARIA = 'PORTARIA2024';
 
   // Lista de cursos do Campus Russas
   const cursos = [
@@ -131,6 +131,11 @@ const Register = () => {
         semestre: formData.semestre,
         role: userType === 'staff' ? 'staff' : 'student'
       };
+
+      // Se for staff, enviar código de acesso
+      if (userType === 'staff') {
+        userData.accessCode = formData.codigoAcesso;
+      }
 
       const response = await apiRegister(userData);
 

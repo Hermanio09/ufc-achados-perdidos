@@ -13,18 +13,47 @@ const generateToken = (id) => {
 // @access  Public
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, matricula, curso, semestre } = req.body;
+    const { name, email, password, matricula, curso, semestre, role, accessCode } = req.body;
 
-    // Validar campos obrigatórios
-    if (!name || !email || !password || !matricula || !curso) {
+    // Validar campos obrigatórios básicos
+    if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
         message: 'Por favor, preencha todos os campos obrigatórios'
       });
     }
 
+    // Validar campos específicos por role
+    const userRole = role || 'student';
+
+    if (userRole === 'student') {
+      if (!matricula || !curso) {
+        return res.status(400).json({
+          success: false,
+          message: 'Estudantes devem preencher matrícula e curso'
+        });
+      }
+    }
+
+    if (userRole === 'staff' || userRole === 'admin') {
+      // Validar código de acesso para funcionários
+      const STAFF_CODE = process.env.STAFF_ACCESS_CODE || 'PORTARIA2024';
+
+      if (!accessCode || accessCode !== STAFF_CODE) {
+        return res.status(403).json({
+          success: false,
+          message: 'Código de acesso inválido para funcionário'
+        });
+      }
+    }
+
     // Verificar se usuário já existe
-    const userExists = await User.findOne({ $or: [{ email }, { matricula }] });
+    const userExists = await User.findOne({
+      $or: [
+        { email },
+        ...(matricula ? [{ matricula }] : [])
+      ]
+    });
 
     if (userExists) {
       return res.status(400).json({
@@ -38,9 +67,10 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
-      matricula,
-      curso,
-      semestre
+      matricula: matricula || null,
+      curso: curso || null,
+      semestre: semestre || null,
+      role: userRole
     });
 
     // Retornar token
