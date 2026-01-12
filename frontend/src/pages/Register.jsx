@@ -123,9 +123,9 @@ const Register = () => {
 
     try {
       const userData = {
-        nome: formData.name,
+        name: formData.name,
         email: formData.email,
-        senha: formData.password,
+        password: formData.password,
         matricula: formData.matricula,
         curso: formData.curso,
         semestre: formData.semestre,

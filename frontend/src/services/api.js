@@ -45,9 +45,7 @@ export const register = async (userData) => {
   if (response.data.success) {
     localStorage.setItem('token', response.data.data.token);
     // Salvar dados do usuário no localStorage
-    if (response.data.data.user) {
-      localStorage.setItem('user', JSON.stringify(response.data.data.user));
-    }
+    localStorage.setItem('user', JSON.stringify(response.data.data));
   }
   return response.data;
 };
@@ -57,9 +55,7 @@ export const login = async (credentials) => {
   if (response.data.success) {
     localStorage.setItem('token', response.data.data.token);
     // Salvar dados do usuário no localStorage
-    if (response.data.data.user) {
-      localStorage.setItem('user', JSON.stringify(response.data.data.user));
-    }
+    localStorage.setItem('user', JSON.stringify(response.data.data));
   }
   return response.data;
 };

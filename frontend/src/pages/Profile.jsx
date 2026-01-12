@@ -11,14 +11,15 @@ const Profile = () => {
     const userData = localStorage.getItem('user');
     if (userData) {
       const parsedUser = JSON.parse(userData);
+      const userName = parsedUser.name || 'Usuário';
       return {
-        name: parsedUser.nome || parsedUser.name || 'Usuário',
+        name: userName,
         email: parsedUser.email || 'email@ufc.br',
         matricula: parsedUser.matricula || 'N/A',
         curso: parsedUser.curso || 'N/A',
         semestre: parsedUser.semestre || 'N/A',
         reputation: parsedUser.reputation || 5.0,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(parsedUser.nome || parsedUser.name || 'Usuario')}&background=004C8C&color=fff&size=128`
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=004C8C&color=fff&size=128`
       };
     }
     return {
