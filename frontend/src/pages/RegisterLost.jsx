@@ -81,12 +81,10 @@ const RegisterLost = () => {
       data.append('category', formData.category);
       data.append('description', formData.description);
       data.append('type', 'lost'); // Tipo: perdido
+      data.append('location', formData.lostLocation || 'Não informado');
 
       if (formData.lostDate) {
         data.append('lostDate', formData.lostDate);
-      }
-      if (formData.lostLocation) {
-        data.append('lostLocation', formData.lostLocation);
       }
       if (formData.image) {
         data.append('image', formData.image);

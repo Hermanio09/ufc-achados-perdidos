@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Image, Settings } from 'lucide-react';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import { createItem } from '../services/api';
 
 const RegisterFound = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -59,17 +62,37 @@ const RegisterFound = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    if (!image) {
-      alert('Por favor, adicione uma foto do item!');
+    // Validações
+    if (!formData.title || !formData.category || !formData.location || !formData.description) {
+      setError('Preencha todos os campos obrigatórios');
+      setLoading(false);
       return;
     }
 
-    // Aqui será feita a chamada para a API
-    console.log('Registrando item:', formData, image);
+    try {
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('category', formData.category);
+      data.append('location', formData.location);
+      data.append('description', formData.description);
+      data.append('type', 'found'); // Tipo: encontrado
+      data.append('inPortaria', formData.inPortaria);
 
-    // Simula sucesso e redireciona
-    navigate('/registro-sucesso');
+      if (image) {
+        data.append('image', image);
+      }
+
+      await createItem(data);
+
+      // Sucesso - redirecionar para home
+      navigate('/home');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Erro ao registrar item encontrado');
+      setLoading(false);
+    }
   };
 
   return (
@@ -228,9 +251,16 @@ const RegisterFound = () => {
           </p>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+            {error}
+          </div>
+        )}
+
         {/* Submit Button */}
-        <Button type="submit" fullWidth size="lg">
-          ✅ REGISTRAR ITEM
+        <Button type="submit" fullWidth size="lg" disabled={loading}>
+          {loading ? 'REGISTRANDO...' : '✅ REGISTRAR ITEM'}
         </Button>
       </form>
     </div>
