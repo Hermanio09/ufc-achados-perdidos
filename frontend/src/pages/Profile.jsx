@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Settings, LogOut, Package, CheckCircle, Search, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getMyItems } from '../services/api';
 
 const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('perdidos');
+  const [lostItems, setLostItems] = useState([]);
+  const [foundItems, setFoundItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Pegar dados reais do usuário logado
   const getUserData = () => {
@@ -35,62 +39,69 @@ const Profile = () => {
 
   const user = getUserData();
 
-  // Mock data - estatísticas
-  const stats = {
-    perdidos: 2,
-    encontrados: 1,
-    recuperados: 3
+  // Buscar itens do usuário da API
+  useEffect(() => {
+    fetchMyItems();
+  }, []);
+
+  const fetchMyItems = async () => {
+    try {
+      setLoading(true);
+
+      // Buscar itens perdidos
+      const lostResponse = await getMyItems('lost');
+      if (lostResponse.success) {
+        setLostItems(lostResponse.data || []);
+      }
+
+      // Buscar itens encontrados
+      const foundResponse = await getMyItems('found');
+      if (foundResponse.success) {
+        setFoundItems(foundResponse.data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar meus itens:', error);
+      setLostItems([]);
+      setFoundItems([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Mock data - itens perdidos
-  const lostItems = [
-    {
-      id: 1,
-      title: 'Fone JBL Preto',
-      category: 'Eletrônicos',
-      date: '23/01/2026',
-      status: 'Recuperado',
-      statusColor: 'success'
-    },
-    {
-      id: 2,
-      title: 'Chave USB',
-      category: 'Documentos',
-      date: '21/01/2026',
-      status: 'Buscando',
-      statusColor: 'warning'
-    }
-  ];
-
-  // Mock data - itens encontrados
-  const foundItems = [
-    {
-      id: 3,
-      title: 'Livro Cálculo',
-      category: 'Documentos',
-      date: '23/01/2026',
-      status: 'Devolvido',
-      statusColor: 'success'
-    }
-  ];
+  // Calcular estatísticas reais
+  const stats = {
+    perdidos: lostItems.length,
+    encontrados: foundItems.length,
+    recuperados: lostItems.filter(item => item.status === 'returned').length
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     navigate('/');
   };
 
-  const getStatusBadge = (status, color) => {
-    const colors = {
-      success: 'bg-green-100 text-green-800',
-      warning: 'bg-yellow-100 text-yellow-800',
-      info: 'bg-blue-100 text-blue-800'
+  const getStatusBadge = (status) => {
+    const statusMap = {
+      'active': { text: 'Ativo', color: 'bg-blue-100 text-blue-800' },
+      'claimed': { text: 'Reivindicado', color: 'bg-yellow-100 text-yellow-800' },
+      'returned': { text: 'Devolvido', color: 'bg-green-100 text-green-800' },
+      'archived': { text: 'Arquivado', color: 'bg-gray-100 text-gray-800' }
     };
 
+    const badge = statusMap[status] || { text: 'Ativo', color: 'bg-blue-100 text-blue-800' };
+
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${colors[color]}`}>
-        {status}
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${badge.color}`}>
+        {badge.text}
       </span>
     );
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Recente';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
   };
 
   return (
@@ -190,64 +201,92 @@ const Profile = () => {
 
       {/* Conteúdo das Tabs */}
       <div className="p-4">
-        {activeTab === 'perdidos' && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Meus Itens Perdidos ({lostItems.length})
-            </h3>
-            {lostItems.map(item => (
-              <div
-                key={item.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
-                    <p className="text-sm text-gray-600">
-                      <span className="text-ufc-blue font-medium">{item.category}</span> • {item.date}
-                    </p>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ufc-blue"></div>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'perdidos' && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Meus Itens Perdidos ({lostItems.length})
+                </h3>
+                {lostItems.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
+                    <Package size={48} className="mx-auto mb-2 text-gray-300" />
+                    <p className="font-medium text-gray-700">Nenhum item perdido</p>
+                    <p className="text-sm mt-2">Registre itens que você perdeu</p>
                   </div>
-                  {getStatusBadge(item.status, item.statusColor)}
-                </div>
-                {item.status === 'Buscando' && (
-                  <button className="mt-2 text-sm text-ufc-blue hover:underline flex items-center gap-1">
-                    <Search size={14} />
-                    Ver itens similares
-                  </button>
+                ) : (
+                  lostItems.map(item => (
+                    <div
+                      key={item._id}
+                      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => navigate(`/item/${item._id}`)}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
+                          <p className="text-sm text-gray-600">
+                            <span className="text-ufc-blue font-medium">{item.category}</span> • {formatDate(item.createdAt)}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">{item.location}</p>
+                        </div>
+                        {getStatusBadge(item.status)}
+                      </div>
+                      {item.status === 'active' && (
+                        <button className="mt-2 text-sm text-ufc-blue hover:underline flex items-center gap-1">
+                          <Search size={14} />
+                          Ver se alguém encontrou
+                        </button>
+                      )}
+                    </div>
+                  ))
                 )}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {activeTab === 'encontrados' && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Itens que Encontrei ({foundItems.length})
-            </h3>
-            {foundItems.map(item => (
-              <div
-                key={item.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
-                    <p className="text-sm text-gray-600">
-                      <span className="text-ufc-blue font-medium">{item.category}</span> • {item.date}
-                    </p>
+            {activeTab === 'encontrados' && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Itens que Encontrei ({foundItems.length})
+                </h3>
+                {foundItems.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
+                    <Package size={48} className="mx-auto mb-2 text-gray-300" />
+                    <p className="font-medium text-gray-700">Nenhum item encontrado</p>
+                    <p className="text-sm mt-2">Registre itens que você encontrou</p>
                   </div>
-                  {getStatusBadge(item.status, item.statusColor)}
-                </div>
-                {item.status === 'Devolvido' && (
-                  <div className="mt-2 flex items-center gap-1 text-sm text-green-600">
-                    <CheckCircle size={14} />
-                    <span>Obrigado por ajudar! +10 pontos de reputação</span>
-                  </div>
+                ) : (
+                  foundItems.map(item => (
+                    <div
+                      key={item._id}
+                      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => navigate(`/item/${item._id}`)}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
+                          <p className="text-sm text-gray-600">
+                            <span className="text-ufc-blue font-medium">{item.category}</span> • {formatDate(item.createdAt)}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">{item.location}</p>
+                        </div>
+                        {getStatusBadge(item.status)}
+                      </div>
+                      {item.status === 'returned' && (
+                        <div className="mt-2 flex items-center gap-1 text-sm text-green-600">
+                          <CheckCircle size={14} />
+                          <span>Obrigado por ajudar! +10 pontos de reputação</span>
+                        </div>
+                      )}
+                    </div>
+                  ))
                 )}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
