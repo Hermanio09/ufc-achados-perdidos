@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import ItemDetails from './pages/ItemDetails';
 import RegisterChoice from './pages/RegisterChoice';
 import RegisterFound from './pages/RegisterFound';
+import RegisterLost from './pages/RegisterLost';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
@@ -59,6 +60,14 @@ function App() {
           element={
             <PrivateRoute>
               <RegisterFound />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/registrar/perdi"
+          element={
+            <PrivateRoute>
+              <RegisterLost />
             </PrivateRoute>
           }
         />
